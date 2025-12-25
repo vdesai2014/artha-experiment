@@ -1,0 +1,19 @@
+# Core ML
+torch>=2.0.0
+torchvision>=0.15.0
+
+# LeRobot (for ACT policy)
+lerobot @ git+https://github.com/huggingface/lerobot.git
+
+# Data handling
+pandas>=2.0.0
+pyarrow>=12.0.0
+numpy>=1.24.0
+pillow>=9.0.0
+
+# HTTP client
+httpx>=0.24.0
+tqdm>=4.65.0
+
+# Visualization (optional, for local debugging)
+# matplotlib>=3.7.0

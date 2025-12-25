@@ -1,0 +1,90 @@
+# SkyPilot job configuration for ACT training on Artha platform
+#
+# Usage:
+#   sky launch skypilot/train_act.yaml \
+#     --env ARTHA_API_KEY=sk_... \
+#     --env ARTHA_USERNAME=testuser \
+#     --env DATASET_NAME=synthetic-v1 \
+#     --env EXPERIMENT_NAME=exp-001
+#
+# Or with a .env file:
+#   export $(cat .env | xargs) && sky launch skypilot/train_act.yaml
+
+name: artha-act-training
+
+resources:
+  accelerators: A10G:1  # or L4:1, A100:1, etc.
+  # cloud: aws  # Uncomment to pin to specific cloud
+  # region: us-west-2
+
+# Number of nodes (1 for single-GPU training)
+num_nodes: 1
+
+# Environment variables (can override via --env)
+envs:
+  ARTHA_API_KEY: ${ARTHA_API_KEY}
+  ARTHA_USERNAME: ${ARTHA_USERNAME:-testuser}
+  DATASET_NAME: ${DATASET_NAME:-synthetic-v1}
+  EXPERIMENT_NAME: ${EXPERIMENT_NAME:-act-run-001}
+  TRAINING_STEPS: ${TRAINING_STEPS:-1000}
+  BATCH_SIZE: ${BATCH_SIZE:-8}
+  CHUNK_SIZE: ${CHUNK_SIZE:-50}
+  SAVE_EVERY: ${SAVE_EVERY:-500}
+
+# File mounts (optional - for mounting existing data)
+# file_mounts:
+#   /data: s3://my-bucket/datasets/
+
+setup: |
+  # Install system dependencies
+  sudo apt-get update
+  sudo apt-get install -y git python3-pip
+
+  # Clone the experiment repo
+  if [ ! -d ~/artha-experiment ]; then
+    git clone https://github.com/YOUR_ORG/artha-experiment.git ~/artha-experiment
+  fi
+
+  cd ~/artha-experiment
+
+  # Create virtual environment
+  if [ ! -d venv ]; then
+    python3 -m venv venv
+  fi
+  source venv/bin/activate
+
+  # Install dependencies
+  pip install --upgrade pip
+  pip install -r requirements.txt
+
+  # Verify installation
+  python -c "import torch; print(f'PyTorch: {torch.__version__}, CUDA: {torch.cuda.is_available()}')"
+  python -c "from lerobot.policies.act.modeling_act import ACTPolicy; print('LeRobot ACT: OK')"
+
+run: |
+  cd ~/artha-experiment
+  source venv/bin/activate
+
+  echo "=============================================="
+  echo "Artha ACT Training Job"
+  echo "=============================================="
+  echo "Username: $ARTHA_USERNAME"
+  echo "Dataset: $DATASET_NAME"
+  echo "Experiment: $EXPERIMENT_NAME"
+  echo "Steps: $TRAINING_STEPS"
+  echo "=============================================="
+
+  # Run training
+  python train.py \
+    --username "$ARTHA_USERNAME" \
+    --dataset "$DATASET_NAME" \
+    --experiment "$EXPERIMENT_NAME" \
+    --steps "$TRAINING_STEPS" \
+    --batch-size "$BATCH_SIZE" \
+    --chunk-size "$CHUNK_SIZE" \
+    --save-every "$SAVE_EVERY" \
+    --upload-every "$SAVE_EVERY"
+
+  echo "=============================================="
+  echo "Training complete!"
+  echo "=============================================="
