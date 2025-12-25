@@ -13,9 +13,9 @@
 name: artha-act-training
 
 resources:
-  accelerators: A10G:1  # or L4:1, A100:1, etc.
-  # cloud: aws  # Uncomment to pin to specific cloud
-  # region: us-west-2
+  cloud: runpod
+  accelerators: A40:1  # RunPod GPU options: A40, A100, RTX4090, etc.
+  disk_size: 100  # GB
 
 # Number of nodes (1 for single-GPU training)
 num_nodes: 1
@@ -23,7 +23,7 @@ num_nodes: 1
 # Environment variables (can override via --env)
 envs:
   ARTHA_API_KEY: ${ARTHA_API_KEY}
-  ARTHA_USERNAME: ${ARTHA_USERNAME:-testuser}
+  ARTHA_USERNAME: ${ARTHA_USERNAME:-artha}
   DATASET_NAME: ${DATASET_NAME:-synthetic-v1}
   EXPERIMENT_NAME: ${EXPERIMENT_NAME:-act-run-001}
   TRAINING_STEPS: ${TRAINING_STEPS:-1000}
