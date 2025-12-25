@@ -42,7 +42,7 @@ setup: |
 
   # Clone the experiment repo
   if [ ! -d ~/artha-experiment ]; then
-    git clone https://github.com/YOUR_ORG/artha-experiment.git ~/artha-experiment
+    git clone https://github.com/vdesai2014/artha-experiment.git ~/artha-experiment
   fi
 
   cd ~/artha-experiment
